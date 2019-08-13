@@ -40,7 +40,7 @@ class Player{
 		this.xp = 0;
 		this.xpToNextLevel = this.level * 10 + 10;
 		this.damage_circle_radius = this.radius * 3;
-		this.damage_circle_color = "rgb(" + (this.maxHealth-this.health/this.maxHealth)*255 + ", " + this.health/this.maxHealth*255 + ", 0)";
+		this.damage_circle_color = "rgb(0, 255, 20)";
 		this.bullets = [];
 		this.maxHealth = this.health;
 		this.levelY = 50;
@@ -52,6 +52,7 @@ class Player{
 		this.xp = bonusXp;
 		this.damage_circle_radius += this.radius * 0.1;
 		this.health = 100;
+		this.level_up_animation();
 	}
 	update_angle(){
 		this.angle = Math.atan2(mouseY - this.y, mouseX - this.x);
@@ -80,7 +81,7 @@ class Player{
 			this.y = canvas.offsetHeight-this.damage_circle_radius;
 		}
 		if(this.xp>=this.xpToNextLevel){
-			this.level_up(0);//this.level_up_animation(0, Math.abs(this.xp - this.xpToNextLevel));
+			this.level_up(this.xp-this.xpToNextLevel);//this.level_up_animation(0, Math.abs(this.xp - this.xpToNextLevel));
 		}
 	}
 	shoot(){
@@ -124,12 +125,12 @@ class Player{
 		context.fillText(this.level, this.x, this.levelY);
 		context.fillStyle = "yellow";
 		context.globalAlpha = this.level_up_text_global_alpha;
-		context.fillText("Level Up!", this.levelY-120, this.levelY+100);
+		context.fillText("Level Up!", canvas.offsetWidth/2-50, this.levelY);
 		context.globalAlpha = 1;
 	}
 	damage(damage){
 		this.health -= damage;
-		this.damage_circle_color = "rgb(" + (this.maxHealth-this.health/this.maxHealth)*255 + ", " + this.health/this.maxHealth*255 + ", 0)";
+		this.damage_circle_color = "rgb(" + ((this.maxHealth-this.health)/this.maxHealth)*255 + ", " + this.health/this.maxHealth*255 + ", 20)";
 	}
 	collision(object){
 		let distX = this.x-object.x;
@@ -141,23 +142,11 @@ class Player{
 			return false;
 		}
 	}
-	/*level_up_animation(type, bonusXp){
-		if(type==0 && this.levelY<canvas.offsetHeight/2+100){
-			//isOnPlay = false;
-			this.levelY++;
-			console.log(this.levelY);
-			this.level_up_text_global_alpha+=0.05;
-		}else if(type==0 && this.levelY>=canvas.offsetHeight/2-100){
-			setTimeout(this.level_up_animation(1, bonusXp), 3000);
+	level_up_animation(){
+		while(this.level_up_text_global_alpha<1){
+			this.level_up_text_global_alpha+=0.00000001;
 		}
-		if(type==1 && this.levelY>this.defaultLevelY){
-			this.levelY--;
-			this.level_up_text_global_alpha-=0.05;
-		}else if(type==1 && this.levelY<=this.defaultLevelY){
-			this.level_up(bonusXp);
-			//isOnPlay = true;
-		}
-	}*/
+	}
 }
 
 class Enemy{
@@ -200,7 +189,7 @@ function drawRotatedImage(x, y, sizeY, sizeY, angle) {
 	context.restore(); 
 }
 
-var player = new Player(canvas.offsetWidth/2, canvas.offsetHeight/2, 20, 500, 0, 4.2, "blue");
+var player = new Player(canvas.offsetWidth/2, canvas.offsetHeight/2, 20, 100, 0, 4.2, "blue");
 var enemys = [];
 var isOnPlay = true, gameOver = false;
 
@@ -237,7 +226,8 @@ function update() {
 						enemys.splice(enemy.id, 1, new Enemy(enemy.id, Math.random()*canvas.offsetWidth, Math.random()*canvas.offsetHeight, 15, 15, 1, Math.PI*2, 1, 1, "red"));
 						break;
 					}
-					if(enemys.length%i==0){
+					let random = Math.floor(Math.random()*11+2);
+					if(random%i==0){
 						enemys.splice(enemy.id, 1, new Enemy(enemy.id, Math.random()*canvas.offsetWidth, Math.random()*canvas.offsetHeight, 15+i, 15+i, i, Math.PI*2, 1, (11-i)/100, "red"));
 						break;
 					}
